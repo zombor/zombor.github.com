@@ -8,6 +8,8 @@ categories: [Architecture, Design Patterns]
 
 I've been dumping my brain about this topic in IRC for about 3-4 months now, and I figure it would just be easiest to do a dump here and link people to it. This series will probably be a few parts, I'm just going to do parts of the dump for a few days.
 
+If you have feedback for me, please use twitter (on the right over there) to do so.
+
 Before I begin, you should watch this (I'm basically going to be rehashing it and adding my own notes): <iframe width="640" height="360" src="http://www.youtube.com/embed/WpkDN78P884?feature=player_detailpage" frameborder="0" allowfullscreen></iframe>
 
 ## MVC
