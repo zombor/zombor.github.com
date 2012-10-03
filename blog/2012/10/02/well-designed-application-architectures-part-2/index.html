@@ -5,7 +5,7 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Jeremy Bush's Tech Dump</title>
+  <title>Well Designed Application Architectures - Part 2 - Business Logic - Jeremy Bush's Tech Dump</title>
   <meta name="author" content="Jeremy Bush">
 
   
@@ -18,7 +18,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://zombor.github.com/">
+  <link rel="canonical" href="http://zombor.github.com/blog/2012/10/02/well-designed-application-architectures-part-2/">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <script src="/javascripts/modernizr-2.0.js"></script>
@@ -74,15 +74,12 @@
 </nav>
   <div id="main">
     <div id="content">
-      <div class="blog-index">
+      <div>
+<article class="hentry" role="article">
   
-  
-  
-    <article>
-      
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2012/10/02/well-designed-application-architectures-part-2/">Well Designed Application Architectures - Part 2 - Business Logic</a></h1>
+      <h1 class="entry-title">Well Designed Application Architectures - Part 2 - Business Logic</h1>
     
     
       <p class="meta">
@@ -105,7 +102,7 @@
   </header>
 
 
-  <div class="entry-content"><p><a href="/blog/2012/09/25/well-designed-application-architectures-part-1/">Last time</a> we talked about what MVC really is, and how to use it properly. It didn&#8217;t really mention much of anything about how/where to put the code that makes your site tick. This code is called your <em>application</em>. It&#8217;s the business logic that, you know, actually does the real work on the site.</p>
+<div class="entry-content"><p><a href="/blog/2012/09/25/well-designed-application-architectures-part-1/">Last time</a> we talked about what MVC really is, and how to use it properly. It didn&#8217;t really mention much of anything about how/where to put the code that makes your site tick. This code is called your <em>application</em>. It&#8217;s the business logic that, you know, actually does the real work on the site.</p>
 
 <p>If you recall from last time, I said that this code should live far, far away from your delivery mechanism (your MVC layer). That&#8217;s pretty abstract. Where should it <em>really</em> go? How do you write it?</p>
 
@@ -250,22 +247,16 @@
 
 <p>Next time we&#8217;ll start building an actual interactor.</p>
 </div>
-  
-  
 
 
-    </article>
-  
-  
-    <article>
+  <footer>
+    <p class="meta">
       
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2012/09/25/well-designed-application-architectures-part-1/">Well Designed Application Architectures - Part 1 - MVC</a></h1>
-    
-    
-      <p class="meta">
-        
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Jeremy Bush</span></span>
+
+      
 
 
 
@@ -277,110 +268,40 @@
   
 
 
-<time datetime="2012-09-25T16:06:00-05:00" pubdate data-updated="true">Sep 25<span>th</span>, 2012</time>
-        
-      </p>
+<time datetime="2012-10-02T06:29:00-05:00" pubdate data-updated="true">Oct 2<span>nd</span>, 2012</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/architecture/'>Architecture</a>, <a class='category' href='/blog/categories/design-patterns/'>Design Patterns</a>
+  
+</span>
+
+
+    </p>
     
-  </header>
-
-
-  <div class="entry-content"><p>I&#8217;ve been dumping my brain about this topic in IRC for about 3-4 months now, and I figure it would just be easiest to do a dump here and link people to it. This series will probably be a few parts, I&#8217;m just going to do parts of the dump for a few days.</p>
-
-<p>If you have feedback for me, please use twitter (on the right over there) to do so.</p>
-
-<p>Before I begin, you should watch this (I&#8217;m basically going to be rehashing it and adding my own notes): <iframe width="640" height="360" src="http://www.youtube.com/embed/WpkDN78P884?feature=player_detailpage" frameborder="0" allowfullscreen></iframe></p>
-
-<h2>MVC</h2>
-
-<p>So, lets start with MVC. Web-based MVC (yes, not the &#8220;real&#8221; kind). &#8220;What&#8217;s wrong with MVC?&#8221;, you might ask? Well, nothing, as long as you use it for it&#8217;s strengths: as a delivery mechanism pattern. We&#8217;ll get into what a delivery mechanism is in a bit. So, how do you use MVC effectively? Well, lets start with the different parts of the acronym:</p>
-
-<h3>Controller</h3>
-
-<p>Your controllers are thin, right? Do they contain <em>only</em> http logic? If they contain any business logic at all, they are not thin. Just because it&#8217;s not database calls doesn&#8217;t mean you can throw it in the controller. The controller shouldn&#8217;t know anything about your domain logic. It should just know:</p>
-
-<ul>
-<li>How to parse incoming request data</li>
-<li>How to send that data to your business classes</li>
-<li>How to send the output from the business classes to the view</li>
-</ul>
-
-
-<p>That&#8217;s <em>it</em>! What do you gain from doing this?</p>
-
-<ul>
-<li>Your controllers are even thinner</li>
-<li>Your controllers are probably testable in isolation, so you can test your http interactions quickly, and without a real web server or framework loading up</li>
-</ul>
-
-
-<h3>Views</h3>
-
-<p>When I say &#8220;view&#8221;, does &#8220;class&#8221; also come into mind? Are you doing all your presentation logic in your templates? Stop it! You can&#8217;t test that. Use something like <a href="http://mustache.github.com/">Mustache</a>. What do you gain by using Mustache?</p>
-
-<ul>
-<li>Logicless templates</li>
-<li>Testable views</li>
-<li>Portable templates (you can reuse your same templates in both your server and client).</li>
-</ul>
-
-
-<p>Logicless templates let you start your views with tests (You do TDD, right?). It keeps your views more maintainable and lets you be more confident that the logic contained in them actually <em>works</em>.</p>
-
-<p>When you write your view classes, they should only accept input from the outside world. They should not be reaching into the database, they should not be instantiating any classes (especially not models!). All they should be doing is accepting input from the controller and formatting that input for display. This display can be anything: html, json, xml, etc. This is another advantage of using mustache: it lets you easily adjust your output template, and not change your logic that parses the data. Reuse people!</p>
-
-<h3>Model</h3>
-
-<p>Wow, what a big area. Basically anything that isn&#8217;t a controller or view goes here. That is A LOT. This is the first problem with using MVC 100% to design your application. If you subscribe to the &#8220;thin controller, fat model&#8221; approach (as just about all web frameworks out there teach you), you <em>will</em> end up with an unmaintainable mess of an application.</p>
-
-<p>Why? Well, first off, you&#8217;ll be combining your domain logic (since your controllers are thin, right?) and your persistance logic (just about every framework tells you to put queries in a model) in the same layer. This is very bad for many reasons:</p>
-
-<ul>
-<li>Hard to test</li>
-<li>Slow to test</li>
-<li>Tests will do too much</li>
-</ul>
-
-
-<p>A lot of the topics in this series will revolve around testing. How can you make your application easier to test? How can you <em>start</em> with tests?</p>
-
-<p>So what can we do? Easy: Don&#8217;t use models. Just don&#8217;t. Models don&#8217;t belong in your MVC delivery mechanism. In this sense, I suppose I should be calling it CVT (Controller-View-Template).</p>
-
-<h2>Delivery Mechanism</h2>
-
-<p>What&#8217;s this &#8220;delivery mechanism&#8221; thing, anyway? A delivery mechanism is:</p>
-
-<p><em>A framework of classes that easily let you redistribute your business logic (your application) in a format specific way, over a specific medium.</em></p>
-
-<p>Your application is not made up of controllers and views. That stuff is all part of your delivery mechanism. So from here on out, I&#8217;ll be refering to your <em>business logic</em> as your <em>application</em>.</p>
-
-<p>You <em>do</em> need these things. You don&#8217;t want to be writing http request and response classes. That crap is already done, and it&#8217;s a lot of work.</p>
-
-<p>A delivery mechanism&#8217;s sole purpose is to call your application, and send it&#8217;s output to a specific format. It could be an html website, a JSON based REST API, or a console based binary. All three of these could be delivering the exact same business logic. All three of these could be different frameworks, because your application is completely decoupled from your delivery mechanism.</p>
-
-<p>Your delivery mechanism should not know anything about your business rules, except how to call the application. It <em>consumes</em> your application, and spits out the data.</p>
-
-<p>Ever cry when your favorite framework released an upgrade, and it broke the old API? Separate your application from your delivery mechanism, and upgrading to a new version (or a completely different) framework becomes much easier. The framework code no longer has it&#8217;s slimy tentacles embeded inside <em>your</em> code. That means less code to change.</p>
-
-<p>This brings me to a related topic: You should try like hell to never have your business logic classes extend a third party class. Don&#8217;t let someone else taint your class&#8217;s API with theirs. You&#8217;ll just end up in a similar situation to the framework problem above. I&#8217;ll go into more details on this in a future post.</p>
-
-<h2>Business Logic</h2>
-
-<p>&#8220;If we can&#8217;t use models, then were the hell does the business logic go?&#8221; You might be asking. Easy:</p>
-
-<p>Far, far, far, far away from your MVC layer. We&#8217;ll get into the details on this next time.</p>
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://zombor.github.com/blog/2012/10/02/well-designed-application-architectures-part-2/" data-via="jeremybush" data-counturl="http://zombor.github.com/blog/2012/10/02/well-designed-application-architectures-part-2/" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
 </div>
-  
-  
 
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2012/09/25/well-designed-application-architectures-part-1/" title="Previous Post: Well Designed Application Architectures - Part 1 - MVC">&laquo; Well Designed Application Architectures - Part 1 - MVC</a>
+      
+      
+    </p>
+  </footer>
+</article>
 
-    </article>
-  
-  <div class="pagination">
-    
-    <a href="/blog/archives">Blog Archives</a>
-    
-  </div>
 </div>
+
 <aside class="sidebar">
   
     <section>
@@ -401,7 +322,7 @@
 <section>
   <h1>GitHub Repos</h1>
   <ul id="gh_repos">
-    <li class="loading">Status updating&#8230;</li>
+    <li class="loading">Status updating...</li>
   </ul>
   
   <a href="https://github.com/zombor">@zombor</a> on GitHub
@@ -431,7 +352,7 @@
 <section>
   <h1>Latest Tweets</h1>
   <ul id="tweets">
-    <li class="loading">Status updating&#8230;</li>
+    <li class="loading">Status updating...</li>
   </ul>
   <script type="text/javascript">
     $.domReady(function(){
@@ -450,6 +371,7 @@
 
   
 </aside>
+
 
     </div>
   </div>

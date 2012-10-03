@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Design Patterns | Jeremy Bush's Tech Dump]]></title>
   <link href="http://zombor.github.com/blog/categories/design-patterns/atom.xml" rel="self"/>
   <link href="http://zombor.github.com/"/>
-  <updated>2012-09-25T22:24:33-05:00</updated>
+  <updated>2012-10-03T06:50:24-05:00</updated>
   <id>http://zombor.github.com/</id>
   <author>
     <name><![CDATA[Jeremy Bush]]></name>
@@ -14,11 +14,187 @@
 
   
   <entry>
+    <title type="html"><![CDATA[Well Designed Application Architectures - Part 2 - Business Logic]]></title>
+    <link href="http://zombor.github.com/blog/2012/10/02/well-designed-application-architectures-part-2/"/>
+    <updated>2012-10-02T06:29:00-05:00</updated>
+    <id>http://zombor.github.com/blog/2012/10/02/well-designed-application-architectures-part-2</id>
+    <content type="html"><![CDATA[<p><a href="/blog/2012/09/25/well-designed-application-architectures-part-1/">Last time</a> we talked about what MVC really is, and how to use it properly. It didn't really mention much of anything about how/where to put the code that makes your site tick. This code is called your <em>application</em>. It's the business logic that, you know, actually does the real work on the site.</p>
+
+<p>If you recall from last time, I said that this code should live far, far away from your delivery mechanism (your MVC layer). That's pretty abstract. Where should it <em>really</em> go? How do you write it?</p>
+
+<p>A lot of people look at me funny when I say "do not write your business logic with a framework". They think "how on earth will I get anything done?". It's actually very easy, and not time consuming at all if you do it right.</p>
+
+<h2>Language</h2>
+
+<p>I'm going to be using PHP for my code examples here. I prefer Ruby, but it seems that it's "harder" to do this in PHP, so I want to show that it's actually not.</p>
+
+<h2>File Organization</h2>
+
+<p>First off, put your business logic into it's own repository. This will make the separtion clear and force you to not muck the separation of concerns together. You'll also be able to recognize your application's purpose from it's file structure, as described in the Uncle Bob talk from last time.</p>
+
+<p>People in the PHP world seem to like the <a href="https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-0.md">PSR-0</a> standard for file and class naming so we'll use that, but not the silly PSR-1 and PSR-2 "standards".</p>
+
+<h1>Components</h1>
+
+<p>Below are the components that we'll be using to design our application.</p>
+
+<h2>Use Cases</h2>
+
+<p>Back in school you learned about a <a href="http://en.wikipedia.org/wiki/Use_case">Use Case</a>, right? Well, they aren't useless after all. Use cases are the backbone of how your application works. We'll be using a use case driven architecture from now on.</p>
+
+<p>Why? They let us define our classes in a structured way, and let any reader of our code know exactly where to go when they need to look at some functionality. Need to know about how a user registers? Simply go to the Register_User class, all the code is there.</p>
+
+<h3>DCI vs Interactors</h3>
+
+<p>I prefer to use the <a href="http://en.wikipedia.org/wiki/Data,_context_and_interaction">DCI</a> pattern for describing my use cases in code. However, it's not clear how to implement DCI in many languages. Because of this, I'll just be describing <em>interactors</em>, which are a similar but simpler way to write use cases.</p>
+
+<p>DCI makes <em>a lot</em> more sense overall, but in some languages (especially php), it's just impossible to implement properly. You basically would need the ability to assign traits to objects at runtime (at the minimum), and php is certainly not capable of that.</p>
+
+<p>An interactor is just a class that describes your use case. It has the following properties:</p>
+
+<ul>
+<li>It has a single public entry point, <code>execute()</code></li>
+<li>All other methods are protected or private</li>
+<li>It raises exceptions when an error occurs</li>
+<li>It returns normalized data (like an array) for a query operation, and returns nothing for a write operation</li>
+<li>It injects all it's dependancies. I like to use factory methods for these, so I'll do that in my examples later on</li>
+</ul>
+
+
+<h2>Database Access</h2>
+
+<p>So where does your database access come into play in all this? A lot of frameworks make you think about the database entirely too early. The database is just a detail about where/how your data gets persisted. Don't worry about it too much yet. Just worry about defining your Data Objects first. We'll use a <em>repository pattern</em> to send those data objects to be persisted, and it doesn't really matter to anyone but the repository class on how that's done.</p>
+
+<h2>Data Objects</h2>
+
+<p>Your data objects classes that model your business objects. They don't extend anything, they don't connect to a database. In php, they are just POPOs (Plain old php objects). Here's a good example:</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;?php&lt;/p>
+</span><span class='line'>
+</span><span class='line'>&lt;p>class User
+</span><span class='line'>{
+</span><span class='line'>  public $id;
+</span><span class='line'>  public $email;
+</span><span class='line'>  public $password;
+</span><span class='line'>  public $first_name;
+</span><span class='line'>  public $last_name;&lt;/p>
+</span><span class='line'>
+</span><span class='line'>&lt;p>  public function __construct($data)
+</span><span class='line'>  {&lt;/p>
+</span><span class='line'>
+</span><span class='line'>&lt;pre>&lt;code>$this-&gt;id = $data['id'];
+</span><span class='line'>$this-&gt;email = $data['email'];
+</span><span class='line'>$this-&gt;password = $data['password'];
+</span><span class='line'>$this-&gt;first_name = $data['first_name'];
+</span><span class='line'>$this-&gt;last_name = $data['last_name'];
+</span><span class='line'>&lt;/code>&lt;/pre>
+</span><span class='line'>
+</span><span class='line'>&lt;p>  }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>Easy.</p>
+
+<h2>Repository Classes</h2>
+
+<p>A repository class is an object that persists and retrieves data objects. That's all it does. Here's an example:</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;?php&lt;/p>
+</span><span class='line'>
+</span><span class='line'>&lt;p>class User_Repository implements Repository
+</span><span class='line'>{
+</span><span class='line'>  protected $_db;&lt;/p>
+</span><span class='line'>
+</span><span class='line'>&lt;p>  public function __construct(Database $db)
+</span><span class='line'>  {&lt;/p>
+</span><span class='line'>
+</span><span class='line'>&lt;pre>&lt;code>$this-&gt;_db = $db;
+</span><span class='line'>&lt;/code>&lt;/pre>
+</span><span class='line'>
+</span><span class='line'>&lt;p>  }&lt;/p>
+</span><span class='line'>
+</span><span class='line'>&lt;p>  public function create(User $user)
+</span><span class='line'>  {&lt;/p>
+</span><span class='line'>
+</span><span class='line'>&lt;pre>&lt;code>$this-&gt;_db-&gt;insert('users')-&gt;values($user-&gt;as_array());
+</span><span class='line'>&lt;/code>&lt;/pre>
+</span><span class='line'>
+</span><span class='line'>&lt;p>  }&lt;/p>
+</span><span class='line'>
+</span><span class='line'>&lt;p>  public function find_by_id($id)
+</span><span class='line'>  {&lt;/p>
+</span><span class='line'>
+</span><span class='line'>&lt;pre>&lt;code>return $this-&gt;_db-&gt;from('users)-&gt;where('id', '=', $id)-&gt;as_object('User');
+</span><span class='line'>&lt;/code>&lt;/pre>
+</span><span class='line'>
+</span><span class='line'>&lt;p>  }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>The repository class should take data objects in, and spit data objects back out. That's it.</p>
+
+<p>Next time we'll start building an actual interactor.</p>
+]]></content>
+  </entry>
+  
+  <entry>
     <title type="html"><![CDATA[Well Designed Application Architectures - Part 1 - MVC]]></title>
     <link href="http://zombor.github.com/blog/2012/09/25/well-designed-application-architectures-part-1/"/>
     <updated>2012-09-25T16:06:00-05:00</updated>
     <id>http://zombor.github.com/blog/2012/09/25/well-designed-application-architectures-part-1</id>
     <content type="html"><![CDATA[<p>I've been dumping my brain about this topic in IRC for about 3-4 months now, and I figure it would just be easiest to do a dump here and link people to it. This series will probably be a few parts, I'm just going to do parts of the dump for a few days.</p>
+
+<p>If you have feedback for me, please use twitter (on the right over there) to do so.</p>
 
 <p>Before I begin, you should watch this (I'm basically going to be rehashing it and adding my own notes): <iframe width="640" height="360" src="http://www.youtube.com/embed/WpkDN78P884?feature=player_detailpage" frameborder="0" allowfullscreen></iframe></p>
 
@@ -93,7 +269,7 @@
 
 <p>Ever cry when your favorite framework released an upgrade, and it broke the old API? Separate your application from your delivery mechanism, and upgrading to a new version (or a completely different) framework becomes much easier. The framework code no longer has it's slimy tentacles embeded inside <em>your</em> code. That means less code to change.</p>
 
-<p>This brings me to a related topic: You should try like hell to never have your business logic classes extended by a third party class. Don't let someone else taint your class's API with theirs. You'll just end up in a similar situation to the framework problem above. I'll go into more details on this in a future post.</p>
+<p>This brings me to a related topic: You should try like hell to never have your business logic classes extend a third party class. Don't let someone else taint your class's API with theirs. You'll just end up in a similar situation to the framework problem above. I'll go into more details on this in a future post.</p>
 
 <h2>Business Logic</h2>
 
