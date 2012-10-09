@@ -85,7 +85,7 @@ A repository class is an object that persists and retrieves data objects. That's
 {% codeblock %}
 <?php
 
-class User_Repository implements Repository
+class User_Repository_Database implements User_Repository
 {
   protected $_db;
 
