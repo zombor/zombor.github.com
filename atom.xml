@@ -4,7 +4,7 @@
   <title><![CDATA[Jeremy Bush's Tech Dump]]></title>
   <link href="http://zombor.github.com/atom.xml" rel="self"/>
   <link href="http://zombor.github.com/"/>
-  <updated>2012-10-03T06:50:24-05:00</updated>
+  <updated>2012-10-08T20:07:28-05:00</updated>
   <id>http://zombor.github.com/</id>
   <author>
     <name><![CDATA[Jeremy Bush]]></name>
@@ -138,7 +138,7 @@
 <span class='line-number'>21</span>
 </pre></td><td class='code'><pre><code class=''><span class='line'>&lt;?php
 </span><span class='line'>
-</span><span class='line'>class User_Repository implements Repository
+</span><span class='line'>class User_Repository_Database implements User_Repository
 </span><span class='line'>{
 </span><span class='line'>  protected $_db;
 </span><span class='line'>

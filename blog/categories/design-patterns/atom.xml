@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Design Patterns | Jeremy Bush's Tech Dump]]></title>
   <link href="http://zombor.github.com/blog/categories/design-patterns/atom.xml" rel="self"/>
   <link href="http://zombor.github.com/"/>
-  <updated>2012-10-03T06:50:24-05:00</updated>
+  <updated>2012-10-08T20:07:28-05:00</updated>
   <id>http://zombor.github.com/</id>
   <author>
     <name><![CDATA[Jeremy Bush]]></name>
@@ -152,7 +152,7 @@
 <span class='line-number'>30</span>
 </pre></td><td class='code'><pre><code class=''><span class='line'>&lt;?php&lt;/p>
 </span><span class='line'>
-</span><span class='line'>&lt;p>class User_Repository implements Repository
+</span><span class='line'>&lt;p>class User_Repository_Database implements User_Repository
 </span><span class='line'>{
 </span><span class='line'>  protected $_db;&lt;/p>
 </span><span class='line'>
