@@ -4,7 +4,7 @@
   <title><![CDATA[Jeremy Bush's Tech Dump]]></title>
   <link href="http://zombor.github.com/atom.xml" rel="self"/>
   <link href="http://zombor.github.com/"/>
-  <updated>2012-10-08T20:07:28-05:00</updated>
+  <updated>2012-10-31T17:08:48-05:00</updated>
   <id>http://zombor.github.com/</id>
   <author>
     <name><![CDATA[Jeremy Bush]]></name>
@@ -12,6 +12,375 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[well-designed-application-architectures-part-3]]></title>
+    <link href="http://zombor.github.com/blog/2012/10/29/well-designed-application-architectures-part-3/"/>
+    <updated>2012-10-29T07:37:00-05:00</updated>
+    <id>http://zombor.github.com/blog/2012/10/29/well-designed-application-architectures-part-3</id>
+    <content type="html"><![CDATA[<p><a href="http://zombor.github.com/blog/2012/10/02/well-designed-application-architectures-part-2/">Last time</a> we talked about how your business logic should look. It was a high level overview of the architecture. This time we&#8217;ll actually put that into practice and write some code. We&#8217;ll be using BDD (Behavior-Driven-Development) to design the application.</p>
+
+<p>We&#8217;re going to be using <a href="http://behat.org/">Behat</a> to run these features. So let&#8217;s start a new project!</p>
+
+<pre><code>mkdir sample-app; cd sample-app
+git init
+</code></pre>
+
+<p>We&#8217;ll use composer to install Behat:</p>
+
+<p>Liquid error: undefined method `Py_IsInitialized&#8217; for RubyPython::Python:Module</p>
+
+<p>And let&#8217;s install it:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>curl http://getcomposer.org/installer | php
+</span><span class='line'>php composer.phar install --prefer-source
+</span><span class='line'>
+</span><span class='line'>bin/behat --init</span></code></pre></td></tr></table></div></figure>
+
+
+<p>So where do we start? BDD says we should start from the outside and move our way in. So, we&#8217;ll start with some Gherkin. I&#8217;ll make up some requirements that you might receive from a product manager:</p>
+
+<figure class='code'><figcaption><span>features/register_account&#46;feature </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>Feature: User Registration
+</span><span class='line'>
+</span><span class='line'>  Scenario: User Registers With Valid Data
+</span><span class='line'>    Given I am an unregistered user
+</span><span class='line'>    When I register with the following information:
+</span><span class='line'>      | first_name | foo         |
+</span><span class='line'>      | last_name  | bar         |
+</span><span class='line'>      | email      | foo@bar.com |
+</span><span class='line'>      | password   | foobar      |
+</span><span class='line'>    Then I should be registered
+</span><span class='line'>    And I should receive a welcome registration email
+</span><span class='line'>
+</span><span class='line'>  Scenario: User Registers With Invalid Data
+</span><span class='line'>    Given I am an unregistered user
+</span><span class='line'>    When I register with the following information:
+</span><span class='line'>      | first_name | foo         |
+</span><span class='line'>      | last_name  | bar         |
+</span><span class='line'>      | email      | foo@bar.com |
+</span><span class='line'>      | password   |             |
+</span><span class='line'>    Then I should not be registered
+</span><span class='line'>    And I should see the following errors:
+</span><span class='line'>    """
+</span><span class='line'>    password is required
+</span><span class='line'>    """</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Now let&#8217;s run it:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>bin/behat</span></code></pre></td></tr></table></div></figure>
+
+
+<p>You&#8217;ll see a bunch of undefined steps with some snippet code. Let&#8217;s paste these into our context file (features/bootstrap/FeatureContext.php) and rerun behat. Now we&#8217;ll see some TODOs! Time to actually write code! We&#8217;ll start from the top:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>Given I am an unregistered user</span></code></pre></td></tr></table></div></figure>
+
+
+<p>This is going to be a no-op. We don&#8217;t need to do anything here, so let&#8217;s just remove the PendingException in the step defintion:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>/**
+</span><span class='line'> *  @Given /^I am an unregistered user$/
+</span><span class='line'> */
+</span><span class='line'>public function iAmAnUnregisteredUser()
+</span><span class='line'>{
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Now that step should be green when we re-run the behat steps. We&#8217;ll move on to the next step. Here&#8217;s where the real meat will start. Since we are writing our business logic, we&#8217;ll start with defining the interface we want to work with, and write the code we <em>wish</em> we had.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>/**
+</span><span class='line'> * @When /^I register with the following information:$/
+</span><span class='line'> */
+</span><span class='line'>public function iRegisterWithTheFollowingInformation(TableNode $table)
+</span><span class='line'>{
+</span><span class='line'>  $parsed_data = [];
+</span><span class='line'>  foreach ($table->getNumeratedRows() as $row)
+</span><span class='line'>  {
+</span><span class='line'>    $parsed_data[$row[0]] = $row[1];
+</span><span class='line'>  }
+</span><span class='line'>
+</span><span class='line'>  $register = new Account_Registration;
+</span><span class='line'>  $result = $register->execute($parsed_data);
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<p>This might be something we would want. Instantiate a new use case class (Account_Registration), and call it&#8217;s execute() method with our registration data.</p>
+
+<p>Let&#8217;s run this in behat:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>PHP Fatal error:  Class 'Account_Registration' not found</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Now we are blocked, we have an error in our tests. So let&#8217;s make this thing pass:</p>
+
+<figure class='code'><figcaption><span>classes/Account/Registration&#46;php </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;?php
+</span><span class='line'>
+</span><span class='line'>class Account_Registration
+</span><span class='line'>{
+</span><span class='line'>  public function execute($params = [])
+</span><span class='line'>  {
+</span><span class='line'>
+</span><span class='line'>  }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Also make sure you require this file in your FeatureContext class.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>require 'classes/Account/Registration.php';</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Now if you run behat, we&#8217;ll have the next step green in both scenarios.</p>
+
+<p>Let&#8217;s move on to the next step. What do we do here? How do we assert the account was created? Simple. We want to use Dependancy Injection, and inject a <em>repository object</em> into the use case class. The use case will then use that repository to persist the data. We will use a mock object to keep track of this. We don&#8217;t want to use the real thing because we don&#8217;t care about the database right now (we will later, and we&#8217;ll replace this code later). We&#8217;ll need to modify our last step definition:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$this->account_repo = new Mock_Account_Repository;
+</span><span class='line'>$register = new Account_Registration($this->account_repo);</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Now when we run behat, we&#8217;ll get a fatal error about this Mock class not existing. So let&#8217;s just create it at the end of the file.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>class Mock_Account_Repository implements Account_Repository
+</span><span class='line'>{
+</span><span class='line'>  public $create_called = FALSE;
+</span><span class='line'>  public $create_data = NULL;
+</span><span class='line'>
+</span><span class='line'>  public function create($data)
+</span><span class='line'>  {
+</span><span class='line'>    $this->create_called = TRUE;
+</span><span class='line'>    $this->create_data = $data;
+</span><span class='line'>  }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<p>And we&#8217;ll need to define that interface. Let&#8217;s do that in our classes folder:</p>
+
+<figure class='code'><figcaption><span>classes/Account/Repository&#46;php </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;?php
+</span><span class='line'>interface Account_Repository {
+</span><span class='line'>  public function create(array $data);
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Make sure you require that file right above the Mock_Account_Repository class defined above. Now we need to assert that our class does what we want. So in our next step definition, we&#8217;ll inspect that mock object:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>/**
+</span><span class='line'> *  @Then /^I should be registered$/
+</span><span class='line'> */
+</span><span class='line'>public function iShouldBeRegistered()
+</span><span class='line'>{
+</span><span class='line'>  Assertion::true($this->account_repo->create_called);
+</span><span class='line'>  Assertion::same($this->data, $this->account_repo->create_data);
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Now when you run this, it should fail. So let&#8217;s make it pass.</p>
+
+<figure class='code'><figcaption><span>classes/Account/Registration&#46;php </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;?php
+</span><span class='line'>
+</span><span class='line'>class Account_Registration
+</span><span class='line'>{
+</span><span class='line'>  protected $_account_repository;
+</span><span class='line'>
+</span><span class='line'>  public function __construct(Account_Repository $account_repository)
+</span><span class='line'>  {
+</span><span class='line'>    $this->_account_repository = $account_repository;
+</span><span class='line'>  }
+</span><span class='line'>
+</span><span class='line'>  public function execute($params = [])
+</span><span class='line'>  {
+</span><span class='line'>    $this->_account_repository->create($params);
+</span><span class='line'>  }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<p>On to the next step! We want to send an email out to the user after they register. We need to abstract out the email handling, so let&#8217;s make a mock class for that too.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>class Mock_Email_Sender implements Email_Sender
+</span><span class='line'>{
+</span><span class='line'>  protected $sent = array();
+</span><span class='line'>
+</span><span class='line'>  public function send_mail($to, $from, $subject, $body)
+</span><span class='line'>  {
+</span><span class='line'>    $this->sent[] = array('to' => $to, 'from' => $from, 'subject' => $subject, 'body' => $body);
+</span><span class='line'>  }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<p>And the interface for this class:</p>
+
+<figure class='code'><figcaption><span>classes/Email/Sender&#46;php </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;?php
+</span><span class='line'>
+</span><span class='line'>interface Email_Sender
+</span><span class='line'>{
+</span><span class='line'>  public function send_mail($to, $from, $subject, $body);
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<p>And let&#8217;s add this to the step definition:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>/**
+</span><span class='line'> *  @Given /^I should receive a welcome registration email$/
+</span><span class='line'> */
+</span><span class='line'>public function iShouldReceiveAWelcomeRegistrationEmail()
+</span><span class='line'>{
+</span><span class='line'>  Assertion::same($this->email, $this->email_sender->sent[0]['to']);
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<p>You&#8217;ll need to modify some previous steps for this. When you are done, you should get an error like:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>Notice: Undefined offset: 0 in features/bootstrap/FeatureContext.php line 81</span></code></pre></td></tr></table></div></figure>
+
+
+<p>So we just need to make this pass. Easy:</p>
+
+<figure class='code'><figcaption><span>classes/Account/Registration&#46;php </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>public function execute($params = [])
+</span><span class='line'>  {
+</span><span class='line'>    $this->_account_repository->create($params);
+</span><span class='line'>    $this->_email_sender->send_mail($params['email'], 'donotreply@foo.com', 'Welcome!', 'The body');
+</span><span class='line'>  }</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Sweet! Our first scenario passes! You should be able to implement the rest of the second scenario fairly easily.</p>
+
+<p>This concludes our tutorial on creating a basic Interactor class. It doesn&#8217;t do much right now, but next time we&#8217;ll add in some validation, and do some other fun stuff with phpspec.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Well Designed Application Architectures - Part 2 - Business Logic]]></title>
