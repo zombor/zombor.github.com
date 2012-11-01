@@ -4,7 +4,7 @@
   <title><![CDATA[Jeremy Bush's Tech Dump]]></title>
   <link href="http://zombor.github.com/atom.xml" rel="self"/>
   <link href="http://zombor.github.com/"/>
-  <updated>2012-10-31T17:08:48-05:00</updated>
+  <updated>2012-11-01T10:02:48-05:00</updated>
   <id>http://zombor.github.com/</id>
   <author>
     <name><![CDATA[Jeremy Bush]]></name>
@@ -28,7 +28,24 @@ git init
 
 <p>We&#8217;ll use composer to install Behat:</p>
 
-<p>Liquid error: undefined method `Py_IsInitialized&#8217; for RubyPython::Python:Module</p>
+<figure class='code'><figcaption><span>composer&#46;json </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>{
+</span><span class='line'>  "require": {
+</span><span class='line'>    "behat/behat": "2.4.*@stable"
+</span><span class='line'>  },
+</span><span class='line'>  "config": {
+</span><span class='line'>    "bin-dir": "bin/"
+</span><span class='line'>  }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
 
 <p>And let&#8217;s install it:</p>
 

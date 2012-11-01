@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Design Patterns | Jeremy Bush's Tech Dump]]></title>
   <link href="http://zombor.github.com/blog/categories/design-patterns/atom.xml" rel="self"/>
   <link href="http://zombor.github.com/"/>
-  <updated>2012-11-01T09:50:37-05:00</updated>
+  <updated>2012-11-01T10:02:48-05:00</updated>
   <id>http://zombor.github.com/</id>
   <author>
     <name><![CDATA[Jeremy Bush]]></name>
@@ -69,30 +69,50 @@
 
 <p>Your data objects classes that model your business objects. They don't extend anything, they don't connect to a database. In php, they are just POPOs (Plain old php objects). Here's a good example:</p>
 
-<p>{% codeblock %}
-&lt;?php</p>
-
-<p>class User
-{
-  public $id;
-  public $email;
-  public $password;
-  public $first_name;
-  public $last_name;</p>
-
-<p>  public function __construct($data)
-  {</p>
-
-<pre><code>$this-&gt;id = $data['id'];
-$this-&gt;email = $data['email'];
-$this-&gt;password = $data['password'];
-$this-&gt;first_name = $data['first_name'];
-$this-&gt;last_name = $data['last_name'];
-</code></pre>
-
-<p>  }
-}
-{% endcodeblock %}</p>
+<p><div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;?php&lt;/p>
+</span><span class='line'>
+</span><span class='line'>&lt;p>class User
+</span><span class='line'>{
+</span><span class='line'>  public $id;
+</span><span class='line'>  public $email;
+</span><span class='line'>  public $password;
+</span><span class='line'>  public $first_name;
+</span><span class='line'>  public $last_name;&lt;/p>
+</span><span class='line'>
+</span><span class='line'>&lt;p>  public function __construct($data)
+</span><span class='line'>  {&lt;/p>
+</span><span class='line'>
+</span><span class='line'>&lt;pre>&lt;code>$this-&gt;id = $data['id'];
+</span><span class='line'>$this-&gt;email = $data['email'];
+</span><span class='line'>$this-&gt;password = $data['password'];
+</span><span class='line'>$this-&gt;first_name = $data['first_name'];
+</span><span class='line'>$this-&gt;last_name = $data['last_name'];
+</span><span class='line'>&lt;/code>&lt;/pre>
+</span><span class='line'>
+</span><span class='line'>&lt;p>  }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p>Easy.</p>
 
@@ -100,38 +120,66 @@ $this-&gt;last_name = $data['last_name'];
 
 <p>A repository class is an object that persists and retrieves data objects. That's all it does. Here's an example:</p>
 
-<p>{% codeblock %}
-&lt;?php</p>
-
-<p>class User_Repository_Database implements User_Repository
-{
-  protected $_db;</p>
-
-<p>  public function __construct(Database $db)
-  {</p>
-
-<pre><code>$this-&gt;_db = $db;
-</code></pre>
-
-<p>  }</p>
-
-<p>  public function create(User $user)
-  {</p>
-
-<pre><code>$this-&gt;_db-&gt;insert('users')-&gt;values($user-&gt;as_array());
-</code></pre>
-
-<p>  }</p>
-
-<p>  public function find_by_id($id)
-  {</p>
-
-<pre><code>return $this-&gt;_db-&gt;from('users)-&gt;where('id', '=', $id)-&gt;as_object('User');
-</code></pre>
-
-<p>  }
-}
-{% endcodeblock %}</p>
+<p><div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;?php&lt;/p>
+</span><span class='line'>
+</span><span class='line'>&lt;p>class User_Repository_Database implements User_Repository
+</span><span class='line'>{
+</span><span class='line'>  protected $_db;&lt;/p>
+</span><span class='line'>
+</span><span class='line'>&lt;p>  public function __construct(Database $db)
+</span><span class='line'>  {&lt;/p>
+</span><span class='line'>
+</span><span class='line'>&lt;pre>&lt;code>$this-&gt;_db = $db;
+</span><span class='line'>&lt;/code>&lt;/pre>
+</span><span class='line'>
+</span><span class='line'>&lt;p>  }&lt;/p>
+</span><span class='line'>
+</span><span class='line'>&lt;p>  public function create(User $user)
+</span><span class='line'>  {&lt;/p>
+</span><span class='line'>
+</span><span class='line'>&lt;pre>&lt;code>$this-&gt;_db-&gt;insert('users')-&gt;values($user-&gt;as_array());
+</span><span class='line'>&lt;/code>&lt;/pre>
+</span><span class='line'>
+</span><span class='line'>&lt;p>  }&lt;/p>
+</span><span class='line'>
+</span><span class='line'>&lt;p>  public function find_by_id($id)
+</span><span class='line'>  {&lt;/p>
+</span><span class='line'>
+</span><span class='line'>&lt;pre>&lt;code>return $this-&gt;_db-&gt;from('users)-&gt;where('id', '=', $id)-&gt;as_object('User');
+</span><span class='line'>&lt;/code>&lt;/pre>
+</span><span class='line'>
+</span><span class='line'>&lt;p>  }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p>The repository class should take data objects in, and spit data objects back out. That's it.</p>
 
